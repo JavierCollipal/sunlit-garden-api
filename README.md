@@ -1,7 +1,7 @@
 # Sunlit Garden Notes API
 
 A NestJS-based GraphQL API for managing personal notes with authentication.
-
+test pipeline
 ## API Overview
 
 The Sunlit Garden Notes API provides a GraphQL interface for managing personal notes. It features:
