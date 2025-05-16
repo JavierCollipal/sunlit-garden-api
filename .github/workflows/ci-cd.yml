@@ -2,17 +2,35 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 env:
   HEROKU_APP_NAME: sunlit-garden-api
 
+# Prevent concurrent deployments
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
+      - name: Debug Trigger Event
+        run: |
+          echo "Event name: ${{ github.event_name }}"
+          echo "Branch name: ${{ github.ref }}"
+          echo "Repository: ${{ github.repository }}"
+
       - uses: actions/checkout@v4
+
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          heroku --version
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,14 +49,24 @@ jobs:
         env:
           NODE_ENV: test
           
+      # Deploy only on push to main/master
       - name: Login to Heroku Container Registry
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:login
-        
-      - name: Build and push Docker image
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
+          echo "Attempting to log in to Heroku Container Registry..."
+          heroku container:login
+          echo "Login successful"
+        
+      - name: Build and push Docker image
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          echo "Building and pushing to ${{ env.HEROKU_APP_NAME }}..."
           heroku container:push web -a ${{ env.HEROKU_APP_NAME }}
+          echo "Push completed. Releasing..."
           heroku container:release web -a ${{ env.HEROKU_APP_NAME }}
+          echo "Release completed"
+          echo "Deployment URL: https://${{ env.HEROKU_APP_NAME }}.herokuapp.com"
