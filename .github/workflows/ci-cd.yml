@@ -1,0 +1,44 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master" ]
+
+env:
+  HEROKU_APP_NAME: sunlit-garden-api
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Copy test env file
+        run: cp test/.env.test .env.test
+
+      - name: Run e2e tests
+        run: npm run test:e2e
+        env:
+          NODE_ENV: test
+          
+      - name: Login to Heroku Container Registry
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku container:login
+        
+      - name: Build and push Docker image
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          heroku container:push web -a ${{ env.HEROKU_APP_NAME }}
+          heroku container:release web -a ${{ env.HEROKU_APP_NAME }}

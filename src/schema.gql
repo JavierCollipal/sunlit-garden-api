@@ -1,0 +1,62 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateNoteInput {
+  feelings: [String!]!
+  places: [String!]!
+  thoughts: [String!]!
+  triggers: [String!]!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createNote(createNoteInput: CreateNoteInput!): Note!
+  removeNote(id: ID!): Note!
+  updateNote(id: ID!, updateNoteInput: UpdateNoteInput!): Note!
+}
+
+type Note {
+  _id: ID!
+  created_at: DateTime!
+  feelings: [String!]!
+  is_deleted: Boolean!
+  places: [String!]!
+  thoughts: [String!]!
+  triggers: [String!]!
+  updated_at: DateTime!
+  user_id: String!
+  version: Float!
+}
+
+type PaginatedNotesResult {
+  hasNext: Boolean!
+  hasPrevious: Boolean!
+  items: [Note!]!
+  limit: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+input PaginationInput {
+  limit: Int! = 10
+  page: Int! = 1
+}
+
+type Query {
+  note(id: ID!): Note!
+  notes(pagination: PaginationInput): PaginatedNotesResult!
+}
+
+input UpdateNoteInput {
+  _id: ID!
+  feelings: [String!]
+  places: [String!]
+  thoughts: [String!]
+  triggers: [String!]
+}
