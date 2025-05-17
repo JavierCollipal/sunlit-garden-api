@@ -44,34 +44,17 @@ jobs:
         env:
           NODE_ENV: test
 
-      # Build and push Docker image if tests pass
-      - name: Build Docker image
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        run: |
-          docker build -t registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web .
-          echo "Docker image built successfully"
-
-      - name: Log in to Heroku Container Registry
+      # Build and deploy to Heroku
+      - name: Deploy to Heroku
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "Logging in to Heroku Container Registry..."
-          echo "$HEROKU_API_KEY" | docker login --username=_ --password-stdin registry.heroku.com
-          echo "Login successful"
-
-      - name: Push Docker image
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        run: |
-          echo "Pushing image to Heroku Container Registry..."
-          docker push registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web
-          echo "Push successful"
-          
-      # Release the container
-      - name: Release to Heroku
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
+          echo "Logging in to Heroku..."
+          heroku container:login
+          echo "Building and pushing to ${{ env.HEROKU_APP_NAME }}..."
+          heroku container:push web -a ${{ env.HEROKU_APP_NAME }}
+          echo "Releasing to ${{ env.HEROKU_APP_NAME }}..."
           heroku container:release web -a ${{ env.HEROKU_APP_NAME }}
+          echo "Deployment completed successfully"
           echo "Deployment URL: https://${{ env.HEROKU_APP_NAME }}.herokuapp.com"
