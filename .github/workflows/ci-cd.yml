@@ -45,20 +45,22 @@ jobs:
           NODE_ENV: test
 
       # Deploy to Heroku (only on push to main)
-      - name: Log in to Heroku
+      - name: Log in to Heroku Container Registry
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: akhileshns/heroku-deploy@v3.12.14
-        with:
-          heroku_api_key: ${{ env.HEROKU_API_KEY }}
-          heroku_app_name: ${{ env.HEROKU_APP_NAME }}
-          heroku_email: ${{ env.HEROKU_EMAIL }}
-          justlogin: true
+        env:
+          HEROKU_API_KEY: ${{ vars.HEROKU_API_KEY }}
+        run: |
+          echo "${{ vars.HEROKU_API_KEY }}" | docker login registry.heroku.com --username=_ --password-stdin
 
       - name: Deploy to Heroku
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
-          HEROKU_API_KEY: ${{ env.HEROKU_API_KEY }}
+          HEROKU_API_KEY: ${{ vars.HEROKU_API_KEY }}
         run: |
           docker build -t registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web .
           docker push registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web
-          heroku container:release web -a ${{ env.HEROKU_APP_NAME }}
+          curl -X PATCH -H "Authorization: Bearer ${{ vars.HEROKU_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
+            -d '{ "updates": [{ "type": "web", "docker_image": "'$(docker inspect registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web --format='{{.Id}}')'" }] }' \
+            https://api.heroku.com/apps/${{ env.HEROKU_APP_NAME }}/formation
