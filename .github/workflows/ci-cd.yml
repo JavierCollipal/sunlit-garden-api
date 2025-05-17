@@ -54,7 +54,7 @@ jobs:
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
           HEROKU_API_KEY: ${{ vars.HEROKU_API_KEY }}
-        run: docker login --username=_ --password=${{ vars.HEROKU_API_KEY }} registry.heroku.com
+        run: heroku container:login
 
       - name: Deploy to Heroku
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
