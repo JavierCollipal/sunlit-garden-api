@@ -44,17 +44,18 @@ jobs:
         env:
           NODE_ENV: test
 
-      # Build and deploy to Heroku
+      # Deploy to Heroku (only on push to main)
       - name: Deploy to Heroku
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo "Logging in to Heroku..."
+          # Login to Heroku Container Registry
           heroku container:login
-          echo "Building and pushing to ${{ env.HEROKU_APP_NAME }}..."
-          heroku container:push web -a ${{ env.HEROKU_APP_NAME }}
-          echo "Releasing to ${{ env.HEROKU_APP_NAME }}..."
+          
+          # Build and push Docker image
+          docker build -t registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web .
+          docker push registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web
+          
+          # Release the new image
           heroku container:release web -a ${{ env.HEROKU_APP_NAME }}
-          echo "Deployment completed successfully"
-          echo "Deployment URL: https://${{ env.HEROKU_APP_NAME }}.herokuapp.com"
