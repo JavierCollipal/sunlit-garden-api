@@ -45,10 +45,14 @@ jobs:
           NODE_ENV: test
 
       # Deploy to Heroku (only on push to main)
+      - name: Install Heroku CLI
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        run: curl https://cli-assets.heroku.com/install.sh | sh
+
       - name: Deploy to Heroku
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_API_KEY: ${{ env.HEROKU_API_KEY }}
         run: |
           # Login to Heroku Container Registry
           heroku container:login
