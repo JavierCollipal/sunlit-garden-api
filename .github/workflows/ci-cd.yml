@@ -63,6 +63,24 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
+          # Set config vars in Heroku
+          heroku config:set \
+            JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            JWT_EXPIRATION_TIME="24h" \
+            MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            NODE_ENV="production" \
+            PORT="3000" \
+            ALLOWED_ORIGINS="${{ secrets.ALLOWED_ORIGINS }}" \
+            RATE_LIMIT_TTL="60000" \
+            RATE_LIMIT_MAX="50" \
+            GRAPHQL_PLAYGROUND="true" \
+            GRAPHQL_DEBUG="false" \
+            GRAPHQL_INTROSPECTION="false" \
+            SECURE_COOKIES="true" \
+            CORS_CREDENTIALS="true" \
+            -a ${{ env.HEROKU_APP_NAME }}
+
+          # Build and deploy container
           docker build -t registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web .
           docker push registry.heroku.com/${{ env.HEROKU_APP_NAME }}/web
           heroku container:release web -a ${{ env.HEROKU_APP_NAME }}
