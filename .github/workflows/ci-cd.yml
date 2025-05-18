@@ -17,6 +17,7 @@ concurrency:
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
+    environment: HEROKU_API_KEY # Environment name where the secrets are stored
     
     steps:
       - name: Debug Trigger Event
