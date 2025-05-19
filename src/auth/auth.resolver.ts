@@ -1,47 +1,52 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
-import {
-  UnauthorizedException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { RegisterInput, LoginInput, AuthResponse } from './dto/auth.dto';
+
+type AuthMutationHandler = (
+  username: string,
+  password: string,
+) => Promise<AuthResponse>;
 
 @Resolver('Auth')
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Public()
-  @Mutation(() => AuthResponse)
-  async login(
-    @Args('input') { username, password }: LoginInput,
-  ): Promise<AuthResponse> {
+  private handleAuthOperation = async (
+    operation: AuthMutationHandler,
+    input: LoginInput | RegisterInput,
+    operationType: string,
+  ): Promise<AuthResponse> => {
     try {
-      return await this.authService.signIn(username, password);
+      return await operation(input.username, input.password);
     } catch (error) {
       if (error instanceof Error) {
         throw new UnauthorizedException(error.message);
       }
-      throw new InternalServerErrorException(
-        'An unexpected error occurred during login',
+      throw new UnauthorizedException(
+        `An unexpected error occurred during ${operationType}`,
       );
     }
+  };
+
+  @Public()
+  @Mutation(() => AuthResponse)
+  async login(@Args('input') input: LoginInput): Promise<AuthResponse> {
+    return this.handleAuthOperation(
+      this.authService.signIn.bind(this.authService),
+      input,
+      'login',
+    );
   }
 
   @Public()
   @Mutation(() => AuthResponse)
-  async register(
-    @Args('input') { username, password }: RegisterInput,
-  ): Promise<AuthResponse> {
-    try {
-      return await this.authService.register(username, password);
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new UnauthorizedException(error.message);
-      }
-      throw new InternalServerErrorException(
-        'An unexpected error occurred during registration',
-      );
-    }
+  async register(@Args('input') input: RegisterInput): Promise<AuthResponse> {
+    return this.handleAuthOperation(
+      this.authService.register.bind(this.authService),
+      input,
+      'registration',
+    );
   }
 }
