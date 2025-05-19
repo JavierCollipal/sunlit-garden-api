@@ -46,7 +46,16 @@ function isOriginalErrorWithStatus(
 
 function formatGraphQLError(
   error: ErrorWithExtensions,
-): ErrorWithExtensions | { message: string; statusCode: number } {
+):
+  | ErrorWithExtensions
+  | { message: string; statusCode: number; details?: unknown } {
+  console.error('GraphQL Error:', {
+    message: error.message,
+    path: error.path,
+    extensions: error.extensions,
+    originalError: error.extensions?.originalError,
+  });
+
   const originalError = error.extensions?.originalError ?? null;
 
   if (originalError !== null && isOriginalErrorWithStatus(originalError)) {
@@ -54,19 +63,20 @@ function formatGraphQLError(
       return {
         message: 'Unauthorized',
         statusCode: 401,
+        details: originalError.message,
       };
     }
   }
 
-  // In production, don't expose internal error details
-  if (process.env.NODE_ENV === 'production') {
-    return {
-      message: 'An error occurred',
-      statusCode: 500,
-    };
-  }
-
-  return error;
+  // Return detailed error info for debugging
+  return {
+    message: error.message,
+    statusCode: 500,
+    details: {
+      path: error.path,
+      extensions: error.extensions,
+    },
+  };
 }
 
 @Module({
@@ -124,12 +134,10 @@ function formatGraphQLError(
       sortSchema: true,
       context: ({ req }: { req: Request }): GraphQLContext => ({ req }),
       formatError: formatGraphQLError,
-      // Production GraphQL settings
-      ...(process.env.NODE_ENV === 'production' && {
-        debug: false,
-        playground: false,
-        introspection: false,
-      }),
+      // Enable debugging features
+      debug: true,
+      playground: true,
+      introspection: true,
     }),
     TerminusModule,
     NotesModule,
