@@ -12,8 +12,11 @@ async function bootstrap() {
   // Explicitly initialize Passport
   app.use(passport.initialize());
 
-  // Enable CORS if needed
-  app.enableCors();
+  // Enable CORS with credentials
+  app.enableCors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || true,
+    credentials: true,
+  });
 
   // Add logging for debugging
   console.log(

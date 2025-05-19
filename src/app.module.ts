@@ -18,10 +18,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
 import { SecurityHeadersMiddleware } from './common/middleware/security-headers.middleware';
 
-interface GraphQLContext {
-  req: Request;
-}
-
 interface OriginalErrorWithStatus {
   status?: number;
   message?: string;
@@ -132,7 +128,12 @@ function formatGraphQLError(
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      context: ({ req }: { req: Request }): GraphQLContext => ({ req }),
+      context: ({ req }: { req: Request }): { req: Request } => {
+        if (!req) {
+          throw new Error('Request object not found in GraphQL context');
+        }
+        return { req };
+      },
       formatError: formatGraphQLError,
       // Enable debugging features
       debug: true,
