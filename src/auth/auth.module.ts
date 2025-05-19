@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { AuthResolver } from './auth.resolver';
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -30,7 +31,7 @@ import { LocalStrategy } from './strategies/local.strategy'; // We'll create thi
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy, LocalStrategy], // Add JwtStrategy here
+  providers: [AuthService, JwtStrategy, LocalStrategy, AuthResolver], // Add AuthResolver
   controllers: [AuthController],
   exports: [AuthService], // Export AuthService if needed elsewhere
 })
