@@ -160,7 +160,7 @@ export class NotesService {
   }
 
   /**
-   * Creates a filter for note-specific queries
+   * Creates a filter for note-specific queries, including user ID
    * @param id - The note ID
    * @param userId - The user ID
    * @returns The query filter
