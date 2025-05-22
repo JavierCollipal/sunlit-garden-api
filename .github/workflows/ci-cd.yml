@@ -40,6 +40,9 @@ jobs:
       - name: Copy test env file
         run: cp test/.env.test .env.test
 
+      - name: Build test
+        run: npm run build
+
       - name: Run e2e tests
         run: npm run test:e2e
         env:
