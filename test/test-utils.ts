@@ -47,21 +47,21 @@ export async function createTestingApp(): Promise<INestApplication> {
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        ThrottlerModule.forRoot([{
-          ttl: 1000, // 1 second for testing
-          limit: 5, // 5 requests per second
-        }]),
+        ThrottlerModule.forRoot([
+          {
+            ttl: 1000, // 1 second for testing
+            limit: 5, // 5 requests per second
+          },
+        ]),
         ConfigModule.forRoot({
           isGlobal: true,
           envFilePath: '.env.test',
           load: [
-            () => (
-              {
-                JWT_SECRET: jwtSecret,
-                MONGODB_URI: mongoUri,
-                ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
-              }
-            ),
+            () => ({
+              JWT_SECRET: jwtSecret,
+              MONGODB_URI: mongoUri,
+              ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
+            }),
           ],
         }),
         MongooseModule.forRoot(mongoUri),

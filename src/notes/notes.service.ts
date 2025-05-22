@@ -53,7 +53,7 @@ export class NotesService {
     const totalPages = Math.ceil(total / limit);
     const hasNext = page < totalPages;
     const hasPrevious = page > 1;
-    
+
     return {
       items,
       total,
@@ -197,7 +197,7 @@ export class NotesService {
       .limit(limit)
       .exec();
   }
-  
+
   /**
    * Counts notes by filter
    * @param filter - The query filter

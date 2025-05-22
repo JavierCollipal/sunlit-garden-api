@@ -15,5 +15,6 @@ console.log('Loaded ALLOWED_ORIGINS:', process.env.ALLOWED_ORIGINS);
 
 // Ensure ALLOWED_ORIGINS is set for tests
 if (!process.env.ALLOWED_ORIGINS) {
-  process.env.ALLOWED_ORIGINS = 'http://localhost:3000,http://localhost:4000,http://localhost:19006';
+  process.env.ALLOWED_ORIGINS =
+    'http://localhost:3000,http://localhost:4000,http://localhost:19006';
 }

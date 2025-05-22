@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserInput } from '../users/dto/create-user.input';
@@ -16,6 +21,20 @@ import {
   handleAuthError,
   validateUserCredentials,
 } from './utils/utils';
+
+interface NestError {
+  status?: number;
+  response?: {
+    statusCode?: number;
+    message?: string;
+  };
+}
+
+interface AuthErrorResponse {
+  message: string;
+  error: string;
+  statusCode: number;
+}
 
 @Injectable()
 export class AuthService {
@@ -45,7 +64,12 @@ export class AuthService {
     const user = await this.usersService.findOne(safeUsername);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      const response: AuthErrorResponse = {
+        message: 'Invalid credentials',
+        error: 'Unauthorized',
+        statusCode: 401,
+      };
+      throw new UnauthorizedException(response);
     }
 
     const result = await this.authOperations.validateAndGenerateToken(
@@ -65,18 +89,45 @@ export class AuthService {
       const user = await this.usersService.create(createUserInput);
       const result = await this.authOperations.createRegistrationToken(user);
       return this.handleAuthResult(result);
-    } catch (e) {
-      const result = handleAuthError(e);
-      if (!result.success) {
-        throw new UnauthorizedException(result.error.message);
+    } catch (error: unknown) {
+      const nestError = error as NestError;
+
+      if (nestError.status === 409 || nestError.response?.statusCode === 409) {
+        const response: AuthErrorResponse = {
+          message: 'Username already exists',
+          error: 'Conflict',
+          statusCode: 409,
+        };
+        throw new ConflictException(response);
       }
-      throw new UnauthorizedException('Registration failed');
+
+      const result = handleAuthError(error);
+      if (!result.success) {
+        const response: AuthErrorResponse = {
+          message: result.error.message,
+          error: 'Bad Request',
+          statusCode: 400,
+        };
+        throw new BadRequestException(response);
+      }
+
+      const response: AuthErrorResponse = {
+        message: 'Registration failed',
+        error: 'Bad Request',
+        statusCode: 400,
+      };
+      throw new BadRequestException(response);
     }
   }
 
   private handleAuthResult(result: Result<AuthResult>): AuthResult {
     if (!result.success) {
-      throw new UnauthorizedException(result.error.message);
+      const response: AuthErrorResponse = {
+        message: 'Invalid credentials',
+        error: 'Unauthorized',
+        statusCode: 401,
+      };
+      throw new UnauthorizedException(response);
     }
     return result.data;
   }

@@ -2,9 +2,11 @@
 
 A NestJS-based GraphQL API for managing personal notes with authentication.
 test pipeline
+
 ## API Overview
 
 The Sunlit Garden Notes API provides a GraphQL interface for managing personal notes. It features:
+
 - JWT-based authentication
 - Note creation, retrieval, updating, and deletion
 - Pagination support for note listing
@@ -78,11 +80,13 @@ query {
 ```graphql
 # Create a new note
 mutation {
-  createNote(createNoteInput: {
-    thoughts: ["Sample thought"]
-    triggers: ["Sample trigger"]
-    places: ["Sample place"]
-  }) {
+  createNote(
+    createNoteInput: {
+      thoughts: ["Sample thought"]
+      triggers: ["Sample trigger"]
+      places: ["Sample place"]
+    }
+  ) {
     _id
     thoughts
     triggers
@@ -197,11 +201,13 @@ MONGODB_URI=your_mongodb_uri
 When developing a React Native app that consumes this API:
 
 1. Install a GraphQL client (recommended: Apollo Client):
+
 ```bash
 npm install @apollo/client graphql
 ```
 
 2. Setup Apollo Client:
+
 ```typescript
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
@@ -227,6 +233,7 @@ const client = new ApolloClient({
 ```
 
 3. Example queries/mutations in React Native:
+
 ```typescript
 import { gql, useQuery, useMutation } from '@apollo/client';
 
@@ -261,6 +268,7 @@ const CREATE_NOTE = gql`
 ```
 
 4. Using in components:
+
 ```typescript
 function NotesList() {
   const { loading, error, data } = useQuery(GET_NOTES, {

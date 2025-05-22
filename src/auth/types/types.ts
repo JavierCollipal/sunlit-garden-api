@@ -57,7 +57,8 @@ export const isValidMongoId = (value: any): value is Types.ObjectId => {
 export const asUsername = (value: string): Username => value as Username;
 export const asPassword = (value: string): Password => value as Password;
 export const asUserId = (value: string): UserId => value as UserId;
-export const asAccessToken = (value: string): AccessToken => value as AccessToken;
+export const asAccessToken = (value: string): AccessToken =>
+  value as AccessToken;
 
 // Result type for error handling
 export type Result<T, E = AuthError> =

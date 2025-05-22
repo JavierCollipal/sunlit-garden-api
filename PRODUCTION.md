@@ -12,6 +12,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Environment Setup
 
 1. Copy `.env.production` to `.env`:
+
    ```bash
    cp .env.production .env
    ```
@@ -24,6 +25,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Security Measures Implemented
 
 1. **API Security**:
+
    - Rate limiting (50 requests/minute per user)
    - JWT authentication with proper expiration
    - Security headers (XSS protection, HSTS, etc.)
@@ -31,6 +33,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
    - Production error handling (no stack traces exposed)
 
 2. **Database Security**:
+
    - Indexed collections for performance
    - Data validation rules
    - Soft deletion support
@@ -45,11 +48,13 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Deployment Steps
 
 1. Build the application:
+
    ```bash
    npm run build
    ```
 
 2. Run database migrations:
+
    ```bash
    npm run typeorm migration:run
    ```
@@ -74,11 +79,13 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## React Native Integration
 
 1. Configure your React Native app with:
+
    ```typescript
    const API_URL = 'https://your-api-domain.com';
    ```
 
 2. Include required headers:
+
    ```typescript
    headers: {
      'Authorization': `Bearer ${token}`,
@@ -96,6 +103,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Monitoring and Maintenance
 
 1. Health Check Endpoint:
+
    ```
    GET /health
    ```
@@ -110,6 +118,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Performance Optimizations
 
 1. Database:
+
    - Indexed fields: user_id, created_at
    - Compound indexes for common queries
    - Pagination implemented
@@ -129,6 +138,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Security Best Practices
 
 1. API Security:
+
    - Never expose stack traces
    - Validate all inputs
    - Use proper HTTP status codes
@@ -143,6 +153,7 @@ This guide outlines the steps needed to deploy the Sunlit Garden API securely fo
 ## Support and Troubleshooting
 
 For production issues:
+
 1. Check logs first
 2. Verify MongoDB connection
 3. Check rate limiting status

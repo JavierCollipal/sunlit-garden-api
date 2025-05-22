@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -20,15 +21,50 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string }> {
+  async signIn(
+    @Body() signInDto: SignInDto,
+  ): Promise<{ access_token: string }> {
+    if (!signInDto.username || !signInDto.password) {
+      throw new BadRequestException({
+        message: 'Username and password are required',
+        error: 'Bad Request',
+        statusCode: 400,
+      });
+    }
+
+    if (signInDto.password.length < 6) {
+      throw new BadRequestException({
+        message: 'Password is too short',
+        error: 'Bad Request',
+        statusCode: 400,
+      });
+    }
+
     return this.authService.signIn(signInDto.username, signInDto.password);
   }
 
   @Public()
   @Post('register')
-  register(
+  @HttpCode(HttpStatus.CREATED)
+  async register(
     @Body() registerDto: RegisterDto,
   ): Promise<{ access_token: string }> {
+    if (!registerDto.username || !registerDto.password) {
+      throw new BadRequestException({
+        message: 'Username and password are required',
+        error: 'Bad Request',
+        statusCode: 400,
+      });
+    }
+
+    if (registerDto.password.length < 6) {
+      throw new BadRequestException({
+        message: 'Password is too short',
+        error: 'Bad Request',
+        statusCode: 400,
+      });
+    }
+
     return this.authService.register(
       registerDto.username,
       registerDto.password,

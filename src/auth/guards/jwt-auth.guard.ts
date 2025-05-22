@@ -40,7 +40,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // Explicitly check for JWT token
     if (!authorization || !authorization.startsWith('Bearer ')) {
-      throw new UnauthorizedException('No JWT token provided');
+      throw new UnauthorizedException({
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+        statusCode: 401,
+      });
     }
 
     return super.canActivate(context);
@@ -55,9 +59,11 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     _context?: ExecutionContext,
   ): any {
     if (err || !user) {
-      throw new UnauthorizedException(
-        err instanceof Error ? err.message : 'Unauthorized',
-      );
+      throw new UnauthorizedException({
+        message: 'Unauthorized',
+        error: 'Unauthorized',
+        statusCode: 401,
+      });
     }
     return user;
   }

@@ -98,7 +98,9 @@ export type AuthOperations = {
   createRegistrationToken: (user: UserDocument) => Promise<Result<AuthResult>>;
 };
 
-export const createAuthOperations = (jwtService: JwtService): AuthOperations => ({
+export const createAuthOperations = (
+  jwtService: JwtService,
+): AuthOperations => ({
   validateAndGenerateToken: async (
     user: UserDocument,
     password: string,

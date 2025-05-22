@@ -18,7 +18,7 @@ jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
     environment: HEROKU_API_KEY # Environment name where the secrets are stored
-    
+
     steps:
       - name: Debug Trigger Event
         run: |
@@ -50,7 +50,7 @@ jobs:
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
-          
+
       - name: Configure Docker for Heroku
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         env:
