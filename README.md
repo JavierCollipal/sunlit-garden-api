@@ -50,8 +50,11 @@ query {
       thoughts
       triggers
       places
+      feelings
       created_at
       updated_at
+      is_deleted
+      version
     }
     total
     page
@@ -65,11 +68,14 @@ query {
 # Get a single note by ID
 query {
   note(id: "noteId") {
-    _id
-    thoughts
-    triggers
-    places
-    created_at
+      _id
+      thoughts
+      triggers
+      places
+      feelings
+      created_at
+      is_deleted
+      version
     updated_at
   }
 }
@@ -85,6 +91,7 @@ mutation {
       thoughts: ["Sample thought"]
       triggers: ["Sample trigger"]
       places: ["Sample place"]
+      feelings: ["Sample feeling"]
     }
   ) {
     _id
@@ -106,11 +113,14 @@ mutation {
       places: ["Updated place"]
     }
   ) {
-    _id
-    thoughts
-    triggers
-    places
-    updated_at
+      _id
+      thoughts
+      triggers
+      places
+      feelings
+      updated_at
+      is_deleted
+      version
   }
 }
 
@@ -129,12 +139,15 @@ mutation {
 ```typescript
 type Note {
   _id: ID!                    // Unique identifier
-  thoughts: [String!]!        // Array of thoughts
-  triggers: [String!]!        // Array of triggers
-  places: [String!]!         // Array of places
-  user_id: String!           // Owner's user ID
-  created_at: DateTime!      // Creation timestamp
-  updated_at: DateTime!      // Last update timestamp
+  thoughts: [String!]!        // Array of thoughts (max 50, 1000 chars each)
+  triggers: [String!]!        // Array of triggers (max 20, 100 chars each)
+  places: [String!]!         // Array of places (max 20, 100 chars each)
+  feelings: [String!]!       // Array of feelings (max 20, 100 chars each)
+  user_id: String!          // Owner's user ID
+  created_at: DateTime!     // Creation timestamp
+  updated_at: DateTime!     // Last update timestamp
+  is_deleted: Boolean!      // Soft delete flag
+  version: Int!            // Document version
 }
 ```
 
@@ -196,7 +209,62 @@ JWT_SECRET=your_jwt_secret
 MONGODB_URI=your_mongodb_uri
 ```
 
-## Development Guide for React Native App
+## React Native App Development
+
+### Prompt for LLM to Create React Native App
+
+Use this prompt to ask an LLM (like GPT-4) to create a React Native app for this API:
+
+```
+Create a React Native app for a journaling application that connects to a GraphQL API. The app should:
+
+1. Core Features:
+   - User authentication (login/register)
+   - Note management (create, read, update, delete)
+   - Rich text support for thoughts
+   - Tags for triggers, places, and feelings
+   - Offline support with synchronization
+
+2. Technical Requirements:
+   - Use Apollo Client for GraphQL integration
+   - Implement secure token storage
+   - Follow clean architecture principles
+   - Use TypeScript for type safety
+   - Implement error handling and loading states
+   - Add proper input validation
+
+3. UI/UX Requirements:
+   - Modern, clean interface
+   - Dark/light theme support
+   - Smooth transitions and animations
+   - Pull-to-refresh functionality
+   - Infinite scroll for notes list
+   - Haptic feedback for actions
+
+4. Data Model Integration:
+   Notes have the following structure:
+   - thoughts: Array of strings (max 50, 1000 chars each)
+   - triggers: Array of strings (max 20, 100 chars each)
+   - places: Array of strings (max 20, 100 chars each)
+   - feelings: Array of strings (max 20, 100 chars each)
+
+5. Authentication Flow:
+   - Implement JWT-based authentication
+   - Handle token refresh
+   - Add secure biometric authentication
+   - Implement logout functionality
+
+Please provide the implementation focusing on:
+1. Project structure and setup
+2. Key components and screens
+3. State management solution
+4. Navigation configuration
+5. API integration
+6. Error handling
+7. Testing strategy
+```
+
+### Development Setup
 
 When developing a React Native app that consumes this API:
 
@@ -246,7 +314,10 @@ const GET_NOTES = gql`
         thoughts
         triggers
         places
+        feelings
         created_at
+        is_deleted
+        version
       }
       total
       hasNext
