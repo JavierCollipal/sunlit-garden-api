@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CommonModule } from './common/common.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -12,7 +13,7 @@ import { NotesModule } from './notes/notes.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { GraphQLError } from 'graphql';
 import { APP_GUARD } from '@nestjs/core';
 import { GqlThrottlerGuard } from './common/guards/gql-throttler.guard';
@@ -77,6 +78,7 @@ function formatGraphQLError(
 
 @Module({
   imports: [
+    CommonModule,
     // Rate limiting configuration
     ThrottlerModule.forRoot([
       {
@@ -128,11 +130,20 @@ function formatGraphQLError(
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      context: ({ req }: { req: Request }): { req: Request } => {
+      context: ({
+        req,
+        res,
+      }: {
+        req: Request;
+        res: Response;
+      }): {
+        req: Request;
+        res: Response;
+      } => {
         if (!req) {
           throw new Error('Request object not found in GraphQL context');
         }
-        return { req };
+        return { req, res };
       },
       formatError: formatGraphQLError,
       // Enable debugging features

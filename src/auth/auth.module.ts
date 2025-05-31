@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CommonModule } from '../common/common.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AuthResolver } from './auth.resolver';
@@ -13,7 +14,8 @@ import { LocalStrategy } from './strategies/local.strategy'; // We'll create thi
   imports: [
     UsersModule,
     PassportModule,
-    ConfigModule, // Ensure ConfigModule is imported
+    ConfigModule,
+    CommonModule,
     JwtModule.registerAsync({
       imports: [ConfigModule], // Import ConfigModule here too
       useFactory: (configService: ConfigService) => {

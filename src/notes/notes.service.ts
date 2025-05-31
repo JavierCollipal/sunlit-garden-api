@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { LoggerService } from '../common/services/logger.service';
 import { Model } from 'mongoose';
 import { Note, NoteDocument } from './schemas/note.schema';
 import { UpdateNoteInput } from './dto/update-note.input';
@@ -14,7 +15,12 @@ import {
 
 @Injectable()
 export class NotesService {
-  constructor(@InjectModel(Note.name) private noteModel: Model<NoteDocument>) {}
+  constructor(
+    @InjectModel(Note.name) private noteModel: Model<NoteDocument>,
+    private readonly logger: LoggerService,
+  ) {
+    this.logger = new LoggerService('NotesService');
+  }
 
   /**
    * Creates a new note
@@ -22,11 +28,27 @@ export class NotesService {
    * @returns The created note
    */
   async create(createNoteInput: CreateNoteWithUser): Promise<Note> {
-    // Create a new note model instance
-    const noteData = this.prepareNoteData(createNoteInput);
-    const createdNote = new this.noteModel(noteData);
-    // Save and return the new note
-    return this.saveNote(createdNote);
+    this.logger.logOperation('create', { userId: createNoteInput.user_id });
+    try {
+      // Create a new note model instance
+      const noteData = this.prepareNoteData(createNoteInput);
+      const createdNote = new this.noteModel(noteData);
+      // Save and return the new note
+      const note = await this.saveNote(createdNote);
+      this.logger.logOperation('create', {
+        userId: createNoteInput.user_id,
+        noteId: note._id,
+        success: true,
+      });
+      return note;
+    } catch (error) {
+      this.logger.logOperation(
+        'create',
+        { userId: createNoteInput.user_id },
+        error as Error,
+      );
+      throw error;
+    }
   }
 
   /**
@@ -72,16 +94,23 @@ export class NotesService {
    * @returns The found note
    */
   async findOne(id: string, userId: string): Promise<Note> {
-    // Validate the note ID
-    this.validateNoteId(id);
-    // Create query filters
-    const filters = this.createNoteFilter(id, userId);
-    // Find the note
-    const note = await this.findNoteByFilter(filters);
-    // Validate the note exists
-    this.validateNoteExists(note, id);
-    // Return the found note as non-null (validated above)
-    return note!;
+    this.logger.logOperation('findOne', { id, userId });
+    try {
+      // Validate the note ID
+      this.validateNoteId(id);
+      // Create query filters
+      const filters = this.createNoteFilter(id, userId);
+      // Find the note
+      const note = await this.findNoteByFilter(filters);
+      // Validate the note exists
+      this.validateNoteExists(note, id);
+      this.logger.logOperation('findOne', { id, userId, success: true });
+      // Return the found note as non-null (validated above)
+      return note!;
+    } catch (error) {
+      this.logger.logOperation('findOne', { id, userId }, error as Error);
+      throw error;
+    }
   }
 
   /**
@@ -96,16 +125,26 @@ export class NotesService {
     userId: string,
     updateNoteInput: UpdateNoteInput,
   ): Promise<Note> {
-    // Validate the note ID
-    this.validateNoteId(id);
-    // Create query filters
-    const filters = this.createNoteFilter(id, userId);
-    // Update the note
-    const updatedNote = await this.updateNoteByFilter(filters, updateNoteInput);
-    // Validate the note exists
-    this.validateNoteExists(updatedNote, id);
-    // Return the updated note as non-null (validated above)
-    return updatedNote!;
+    this.logger.logOperation('update', { id, userId });
+    try {
+      // Validate the note ID
+      this.validateNoteId(id);
+      // Create query filters
+      const filters = this.createNoteFilter(id, userId);
+      // Update the note
+      const updatedNote = await this.updateNoteByFilter(
+        filters,
+        updateNoteInput,
+      );
+      // Validate the note exists
+      this.validateNoteExists(updatedNote, id);
+      this.logger.logOperation('update', { id, userId, success: true });
+      // Return the updated note as non-null (validated above)
+      return updatedNote!;
+    } catch (error) {
+      this.logger.logOperation('update', { id, userId }, error as Error);
+      throw error;
+    }
   }
 
   /**
@@ -115,16 +154,23 @@ export class NotesService {
    * @returns The removed note
    */
   async remove(id: string, userId: string): Promise<Note> {
-    // Validate the note ID
-    this.validateNoteId(id);
-    // Create query filters
-    const filters = this.createNoteFilter(id, userId);
-    // Delete the note
-    const deletedNote = await this.deleteNoteByFilter(filters);
-    // Validate the note exists
-    this.validateNoteExists(deletedNote, id);
-    // Return the deleted note as non-null (validated above)
-    return deletedNote!;
+    this.logger.logOperation('remove', { id, userId });
+    try {
+      // Validate the note ID
+      this.validateNoteId(id);
+      // Create query filters
+      const filters = this.createNoteFilter(id, userId);
+      // Delete the note
+      const deletedNote = await this.deleteNoteByFilter(filters);
+      // Validate the note exists
+      this.validateNoteExists(deletedNote, id);
+      this.logger.logOperation('remove', { id, userId, success: true });
+      // Return the deleted note as non-null (validated above)
+      return deletedNote!;
+    } catch (error) {
+      this.logger.logOperation('remove', { id, userId }, error as Error);
+      throw error;
+    }
   }
 
   /**
