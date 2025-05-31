@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Server } from 'http';
 import mongoose from 'mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -162,8 +163,8 @@ export async function closeTestingApp(): Promise<void> {
 
 // Type-safe wrapper for supertest
 
-export function request(app: unknown): ReturnType<typeof supertest> {
-  return supertest(app as any);
+export function request(app: Server): ReturnType<typeof supertest> {
+  return supertest(app);
 }
 
 export async function loginUserAndGetToken(

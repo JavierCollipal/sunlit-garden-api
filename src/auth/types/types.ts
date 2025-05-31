@@ -49,7 +49,9 @@ export const isUserDocument = (value: unknown): value is UserDocument => {
   );
 };
 
-export const isValidMongoId = (value: any): value is Types.ObjectId => {
+export const isValidMongoId = (
+  value: string | number | Types.ObjectId,
+): value is Types.ObjectId => {
   return Types.ObjectId.isValid(value);
 };
 

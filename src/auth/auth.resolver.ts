@@ -3,11 +3,18 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { RegisterInput, LoginInput, AuthResponse } from './dto/auth.dto';
+import {
+  AuthResult,
+  Username,
+  Password,
+  asUsername,
+  asPassword,
+} from './types/types';
 
 type AuthMutationHandler = (
-  username: string,
-  password: string,
-) => Promise<AuthResponse>;
+  username: Username,
+  password: Password,
+) => Promise<AuthResult>;
 
 @Resolver('Auth')
 export class AuthResolver {
@@ -19,7 +26,10 @@ export class AuthResolver {
     operationType: string,
   ): Promise<AuthResponse> => {
     try {
-      return await operation(input.username, input.password);
+      return await operation(
+        asUsername(input.username),
+        asPassword(input.password),
+      );
     } catch (error) {
       if (error instanceof Error) {
         throw new UnauthorizedException(error.message);
