@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserInput } from './dto/create-user.input';
 import { UserQueryFilters } from './types/users.types';
-
+// trigger
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
