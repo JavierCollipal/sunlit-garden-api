@@ -16,12 +16,16 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || true,
     credentials: true,
-  });
-
-  // Add logging for debugging
-  console.log(
-    'Initializing NestJS application with Passport and Rate Limiting',
-  );
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+      'Origin',
+    ],
 
   process.on('uncaughtException', (error: Error) => {
     if (error.message.includes('ThrottlerException')) {
