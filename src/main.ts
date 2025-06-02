@@ -26,6 +26,15 @@ async function bootstrap() {
       'Access-Control-Request-Headers',
       'Origin',
     ],
+    exposedHeaders: ['Access-Control-Allow-Origin'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
+
+  // Add logging for debugging
+  console.log(
+    'Initializing NestJS application with Passport and Rate Limiting',
+  );
 
   process.on('uncaughtException', (error: Error) => {
     if (error.message.includes('ThrottlerException')) {
